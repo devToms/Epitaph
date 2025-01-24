@@ -1,0 +1,45 @@
+parameters:
+    paths:
+        - ./src
+    exclude_files:
+        - '#.*test.*#'
+    layers:
+        - name: Domain
+          collectors:
+              - type: classLike
+                value: ^App\\Module\\(?:Auth|Commerce)\\Domain\\.*
+              - type: classLike
+                value: ^App\\Common\\Domain\\.*
+        - name: Application
+          collectors:
+              - type: classLike
+                value: ^App\\Module\\(?:Auth|Commerce)\\Application\\.*
+              - type: classLike
+                value: ^App\\Common\\Application\\.*
+        - name: Infrastructure
+          collectors:
+              - type: classLike
+                value: ^App\\Module\\(?:Auth|Commerce)\\Infrastructure\\.*
+              - type: classLike
+                value: ^App\\Common\\Infrastructure\\.*
+        - name: Vendor
+          collectors:
+              - type: bool
+                must:
+                    - type: classLike
+                      value: .+\\.*
+                must_not:
+                    - type: classLike
+                      value: ^App\\.*
+                    - type: classLike
+                      value: Doctrine\\Common\\Collections\\.*
+    ruleset:
+        Domain:
+            - Vendor
+        Application:
+            - Domain
+            - Vendor
+        Infrastructure:
+            - Domain
+            - Application
+            - Vendor

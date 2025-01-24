@@ -1,0 +1,21 @@
+lexik_jwt_authentication:
+    # Konfiguracja kluczy JWT
+    secret_key: '%env(resolve:JWT_SECRET_KEY)%'
+    public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
+    pass_phrase: '%env(JWT_PASSPHRASE)%'
+    token_ttl: 3600  # Czas życia tokenu w sekundach (1 godzina)
+
+    # Ustawienia ekstraktora tokenu (z nagłówka Authorization)
+    token_extractors:
+        authorization_header:
+            enabled: true
+            prefix: Bearer
+            name: Authorization
+
+    # Blokowanie tokenów (włączone)
+    blocklist_token:
+        enabled: true
+        cache: cache.app  # Można użyć 'cache.app' lub skonfigurować własną pamięć podręczną, np. Redis
+
+    # Możliwość zmiany przechowywania blokowanych tokenów na pamięć podręczną Redis (opcjonalnie)
+    # cache: block_list_token_cache_pool

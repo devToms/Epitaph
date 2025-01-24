@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Common\Application\BusResult;
+
+readonly class QueryResult implements BusResultInterface
+{
+    public function __construct(
+        public bool $success,
+        public int $statusCode,
+        public mixed $data = null,
+    ) {
+    }
+}

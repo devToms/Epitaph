@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Module\Commerce\Domain\Entity\OrderStatusUpdate" table="order_status_update">
+        <id name="id" type="string" column="id">
+            <!-- <generator strategy="AUTO"/> -->
+        </id>
+
+        <many-to-one field="order" target-entity="App\Module\Commerce\Domain\Entity\Order" inversed-by="ordersStatusUpdates" />
+
+        <field name="status" type="string" nullable="false"/>
+        <field name="createdAt" type="datetime_immutable" nullable="false"/>
+</entity>
+
+
+</doctrine-mapping>

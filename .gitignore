@@ -1,0 +1,6 @@
+###> symfony/framework-bundle ###
+
+/config/jwt
+/public/bundles/
+/var/
+/vendor/

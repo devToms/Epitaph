@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Module\Commerce\Domain\Entity\Product" table="product" >
+        <id name="id" type="integer">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="name" type="string" length="200"/>
+        <field name="slug" type="string" length="200"/>
+        <field name="price" type="float"/>
+        <field name="deletedAt" type="datetime_immutable" nullable="true"/>
+        <field name="updatedAt" type="datetime_immutable"/>
+        <field name="createdAt" type="datetime_immutable" column="created_at"/>
+
+        <!-- <many-to-many field="categories" target-entity="App\Module\Commerce\Domain\Entity\Category" mapped-by="products"/> -->
+
+        <indexes>
+            <index name="product_search_idx" columns="name"/>
+            <index columns="slug"/>
+        </indexes>
+    </entity>
+
+</doctrine-mapping>
+
+
+
+
+
+
+
+
+<!-- <?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Module\Commerce\Domain\Entity\Product" table="product">
+        <id name="id" type="integer">
+            <generator strategy="AUTO"/>
+        </id>
+        
+        <field name="name" type="string" length="200"/>
+        <field name="slug" type="string" length="200"/>
+        <field name="price" type="float"/>
+        <field name="deletedAt" type="datetime_immutable" nullable="true"/>
+        <field name="updatedAt" type="datetime_immutable"/>
+        <field name="createdAt" type="datetime_immutable" column="created_at"/>
+
+      
+        <indexes>
+            <index name="product_search_idx" columns="name"/>
+            <index columns="slug"/>
+        </indexes>
+    </entity>
+</doctrine-mapping> -->

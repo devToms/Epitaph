@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                          http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Module\Commerce\Domain\Entity\OrderProduct" table="`order_product`">
+        <!-- Identyfikator encji -->
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <!-- Relacje -->
+        <many-to-one field="order" target-entity="App\Module\Commerce\Domain\Entity\Order"  inversed-by="ordersProducts">
+            <join-column name="order_id" referenced-column-name="id" nullable="false"/>
+        </many-to-one>
+
+        <!-- Relacja Many-to-One do Product -->
+        <many-to-one field="product" target-entity="App\Module\Commerce\Domain\Entity\Product" >
+            <join-column name="product_id" referenced-column-name="id" nullable="false"/>
+        </many-to-one>
+
+
+        <!-- Pola encji -->
+        <field name="productQuantity" column="product_quantity" type="integer" nullable="false"/>
+        <field name="productPricePerPiece" column="product_price_per_piece" type="float" nullable="false"/>
+    </entity>
+</doctrine-mapping>

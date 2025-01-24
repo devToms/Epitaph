@@ -1,0 +1,72 @@
+parameters:
+    redis_url: '%env(REDIS_URL)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Module/Auth/Domain/Entity'
+            - '../src/Module/Commerce/Domain/Entity'
+            - '../src/Kernel.php'
+
+    
+    App\Module\Commerce\Domain\Repository\ProductRepositoryInterface:
+        class: 'App\Module\Commerce\Infrastructure\Doctrine\Repository\ProductRepository'
+    
+    App\Module\Auth\Domain\Repository\UserRepositoryInterface:
+        class: 'App\Module\Auth\Infrastructure\Doctrine\Repository\UserRepository'
+
+    App\Module\Commerce\Domain\Repository\CartRepositoryInterface:
+        class: 'App\Module\Commerce\Infrastructure\Doctrine\Repository\CartRepository'
+    
+    App\Module\Commerce\Domain\Repository\CartItemRepositoryInterface:
+        class: 'App\Module\Commerce\Infrastructure\Doctrine\Repository\CartItemRepository'
+
+    App\Module\Commerce\Domain\Repository\OrderRepositoryInterface:
+        class: 'App\Module\Commerce\Infrastructure\Doctrine\Repository\OrderRepository'
+
+
+
+    App\Module\Auth\Application\EventSubscriber\AuthenticationSuccessSubscriber:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 255 }
+
+    App\Module\Auth\Application\EventSubscriber\AuthenticationFailureSubscriber:
+        tags:
+            - { name: kernel.event_subscriber }
+
+ 
+
+    App\Module\Auth\UI\Controller\AuthController:
+        public: true
+        tags: ['controller.service_arguments']
+
+    App\Module\Commerce\Application\Query\FindProductBySlug\FindProductBySlugQueryHandler:
+        tags: ['messenger.message_handler']
+
+
+    App\Common\Infrastructure\Cache\CacheCreator:
+        arguments:
+            $logger: '@logger'       
+            $redisUrl: '%redis_url%'
+
+    App\Common\Infrastructure\Cache\CacheProxy:
+        arguments:
+            $cache: '@redis_service'  
+            $logger: '@logger'        
+            $prefix: ''
+
+
+    redis_service:
+        class: Redis
+        calls:
+            - method: connect
+              arguments:
+                - '%env(REDIS_URL)%'
+
+   
