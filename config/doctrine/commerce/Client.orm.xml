@@ -5,34 +5,26 @@
                                       http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
     <entity name="App\Module\Commerce\Domain\Entity\Client" table="client" repository-class="App\Module\Commerce\Domain\Repository\ClientRepositoryInterface">
-        <!-- ID -->
+      
         <id name="id" type="string">
             <generator strategy="NONE"/>
         </id>
 
-        <!-- Pole email -->
         <field name="email" type="string" length="200" unique="true"/>
 
-        <!-- Pole name -->
         <field name="name" type="string" length="100"/>
 
-        <!-- Pole surname -->
         <field name="surname" type="string" length="100"/>
 
-        <!-- Pole updatedAt -->
         <field name="updatedAt" type="datetime_immutable"/>
 
-        <!-- Pole createdAt -->
         <field name="createdAt" type="datetime_immutable"/>
 
        
-
-        <!-- Lifecycle callbacks -->
         <lifecycle-callbacks>
             <lifecycle-callback type="preUpdate" method="setUpdatedAtValue"/>
         </lifecycle-callbacks>
 
-        <!-- Indeksy -->
         <indexes>
             <index name="client_search_idx" columns="email"/>
         </indexes>

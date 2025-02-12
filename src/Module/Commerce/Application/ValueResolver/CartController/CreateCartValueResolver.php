@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Module\Commerce\Application\ValueResolver\CartController;
 
-use App\Module\Commerce\Application\DTO\AddItemToCartDTO;
+use App\Module\Commerce\Application\DTO\CreateCartDTO;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\AsTargetedValueResolver;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-#[AsTargetedValueResolver('add_item_to_cart_dto')]
-readonly class AddItemToCartValueResolver implements ValueResolverInterface
+#[AsTargetedValueResolver('create_cart_dto')]
+readonly class CreateCartValueResolver implements ValueResolverInterface
 {
     public function __construct(
         private ValidatorInterface $validator,
@@ -20,16 +20,14 @@ readonly class AddItemToCartValueResolver implements ValueResolverInterface
     }
 
     /**
-     * @return iterable<AddItemToCartDTO>
+     * @return iterable<CreateCartDTO>
      */
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
         $data = $request->toArray();
-     
-        $dto = new AddItemToCartDTO(
-            cartUuid: (string) ($data['cartUuid'] ?? ''), 
-            productId: (int) ($data['productId'] ?? ''),
-            quantity: (int) ($data['quantity'] ?? 1),
+
+        $dto = new CreateCartDTO(
+            clientUuid: (string) ($data['clientUuid'] ?? '')
         );
 
         $errors = $this->validator->validate($dto);

@@ -47,7 +47,7 @@ readonly class UpdateCartCommandHandler implements CommandHandlerInterface
             if (!$product) {
                 throw new \InvalidArgumentException('Produkt nie znaleziony.');
             }
-
+         
             $cart->updateItem($product, $command->dto->quantity);
             $this->cartRepository->save($cart, true);
           

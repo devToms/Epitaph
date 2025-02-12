@@ -4,33 +4,25 @@
       xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                           http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <!-- User Entity -->
+
     <entity name="App\Module\Auth\Domain\Entity\User" table="user" repository-class="App\Module\Auth\Domain\Repository\UserRepositoryInterface">
      
-        <!-- Id -->
         <id name="id" type="string">
             <!-- <generator strategy="UUID" /> -->
         </id>
 
-        <!-- Email -->
         <field name="email" type="string" length="200" unique="true" />
 
-        <!-- Password -->
         <field name="password" type="string" length="255" />
 
-        <!-- Name -->
         <field name="name" type="string" length="100" />
 
-        <!-- Surname -->
         <field name="surname" type="string" length="100" />
 
-        <!-- Roles -->
         <field name="roles" type="json" />
 
-        <!-- Updated At -->
         <field name="updatedAt" type="datetime_immutable" nullable="false" />
 
-        <!-- Created At -->
         <field name="createdAt" type="datetime_immutable" nullable="false" />
 
         <indexes>

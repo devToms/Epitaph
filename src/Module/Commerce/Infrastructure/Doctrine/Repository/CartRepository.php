@@ -31,13 +31,9 @@ class CartRepository extends ServiceEntityRepository implements CartRepositoryIn
 
     public function findById(string $id): ?Cart
     {
-        return $this->createQueryBuilder('c')
-            ->select('c')
-            ->where('c.id = :id')
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getOneOrNullResult();
+        return $this->find($id);
     }
+
 
     public function findByIdWithFind(string $id): ?Cart
     {

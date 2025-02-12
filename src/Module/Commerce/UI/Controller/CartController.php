@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Module\Commerce\UI\Controller;
 
+use App\Module\Commerce\Application\Command\CreateCart\CreateCartCommand;
 use App\Module\Commerce\Application\Command\AddItemToCart\AddItemToCartCommand;
 use App\Module\Commerce\Application\Command\UpdateCart\UpdateCartCommand;
 use App\Module\Commerce\Application\Command\RemoveItemFromCart\RemoveItemFromCartCommand;
 use App\Module\Commerce\Application\Query\GetCartItems\GetCartItemsQuery;
+use App\Module\Commerce\Application\DTO\CreateCartDTO;
 use App\Module\Commerce\Application\DTO\AddItemToCartDTO;
 use App\Module\Commerce\Application\DTO\UpdateItemCartDTO;
 use App\Module\Commerce\Application\DTO\RemoveItemFromCartDTO;
@@ -39,6 +41,65 @@ class CartController extends AbstractController
     }
 
     #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Return items in the cart',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'bool'),
+                new OA\Property(
+                    property: 'data',
+                    type: 'array',
+                    items: new OA\Items(type: 'object'),
+                ),
+            ],
+        ),
+    )]
+    #[Route('/items', methods: [Request::METHOD_GET])]
+    #[IsGranted('ROLE_USER')]
+    public function getCartItems(): Response
+    {
+        $queryResult = $this->queryBus->handle(new GetCartItemsQuery($this->getUser()->getId()));
+
+        return $this->responseBuilder->buildResponse(
+            $queryResult,
+            'Items loaded successfully.',
+            'Failed to get items.',
+            $queryResult->data
+        );  
+    }
+
+    #[OA\Response(
+        response: Response::HTTP_CREATED,
+        description: 'Create cart',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'bool'),
+                new OA\Property(property: 'message', type: 'string'),
+            ],
+        ),
+    )]
+    #[OA\RequestBody(content: new Model(type: CreateCartDTO::class, groups: ['default']))]
+    #[Route('/create', methods: [Request::METHOD_POST])]
+    #[IsGranted('ROLE_USER')]
+    public function createCart(#[ValueResolver('create_cart_dto')] CreateCartDTO $dto): Response
+    {
+        if ($dto->hasErrors()) {
+            return $this->json([
+                'success' => false,
+                'errors' => $dto->getErrors(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $commandResult = $this->commandBus->handle(new CreateCartCommand($dto));
+
+        return $this->responseBuilder->buildResponse(
+            $commandResult, 
+            'Cart was created successfully.', 
+            'Failed create cart'
+        );
+    }
+
+    #[OA\Response(
         response: Response::HTTP_CREATED,
         description: 'Add an item to the cart',
         content: new OA\JsonContent(
@@ -65,7 +126,7 @@ class CartController extends AbstractController
         return $this->responseBuilder->buildResponse(
             $commandResult, 
             'Cart add successfully.', 
-            'Failed to adding order'
+            'Failed to adding item'
         );
     }
 
@@ -82,7 +143,7 @@ class CartController extends AbstractController
     #[OA\RequestBody(content: new Model(type: UpdateItemCartDTO::class, groups: ['default']))]
     #[Route('/update/{id}', methods: [Request::METHOD_PUT])]
     #[IsGranted('ROLE_USER')]
-    public function updateItemsCart(
+    public function update(
         #[ValueResolver('update_item_cart_dto')] UpdateItemCartDTO $dto,
         string $id,
         ): Response
@@ -101,11 +162,42 @@ class CartController extends AbstractController
             $cart = $this->entityManager->getReference(Cart::class, $queryResult->data['id']);
             $commandResult = $this->commandBus->handle(new UpdateCartCommand($cart, $dto));
         }
-
+        $var = 12;
         return $this->responseBuilder->buildResponse(
             $commandResult, 
             'Cart updated successfully.', 
             'Failed to update cart'
+        );
+    }
+
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Remove an item from the cart',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'success', type: 'bool'),
+                new OA\Property(property: 'message', type: 'string'),
+            ],
+        ),
+    )]
+    #[OA\RequestBody(content: new Model(type: RemoveItemFromCartDTO::class, groups: ['default']))]
+    #[Route('/remove-item', methods: [Request::METHOD_POST])]
+    #[IsGranted('ROLE_USER')]
+    public function removeItemFromCart(#[ValueResolver('remove_item_from_cart_dto')] RemoveItemFromCartDTO $dto): Response
+    {
+        if ($dto->hasErrors()) {
+            return $this->json([
+                'success' => false,
+                'errors' => $dto->getErrors(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $commandResult = $this->commandBus->handle(new RemoveItemFromCartCommand($dto));
+
+        return $this->responseBuilder->buildResponse(
+            $commandResult, 
+            'Cart deleted successfully.', 
+            'Failed to delete cart'
         );
     }
 }

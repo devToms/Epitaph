@@ -5,31 +5,27 @@
                                       http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
     <entity name="App\Module\Commerce\Domain\Entity\CartItem" table="cart_item" repository-class="App\Repository\CartItemRepository">
-        <!-- ID -->
+      
         <id name="id" type="string">
             <generator strategy="NONE"/>
         </id>
 
-        <!-- Relacja Many-to-One do Cart -->
+      
         <many-to-one field="cart" target-entity="App\Module\Commerce\Domain\Entity\Cart" inversed-by="items">
             <join-column name="cart_id" referenced-column-name="id" nullable="false"/>
         </many-to-one>
 
-        <!-- Relacja Many-to-One do Product -->
+
         <many-to-one field="product" target-entity="App\Module\Commerce\Domain\Entity\Product">
             <join-column name="product_id" referenced-column-name="id" nullable="false"/>
         </many-to-one>
 
 
-
-        <!-- Ilość -->
         <field name="quantity" type="integer" nullable="true"/>
 
         <field name="price" type="float" nullable="true"/>
 
      
-
-        <!-- Indeksy (opcjonalnie) -->
         <indexes>
             <index name="cart_item_index" columns="id"/>
         </indexes>

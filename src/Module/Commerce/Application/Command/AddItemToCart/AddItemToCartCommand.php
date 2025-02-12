@@ -11,5 +11,5 @@ class AddItemToCartCommand implements CommandInterface
 {
     public function __construct(
         public AddItemToCartDTO $dto
-    ) {}
+    ){}
 }

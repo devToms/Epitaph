@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Module\Commerce\Application\Command\AddItemToCart;
 
 use App\Module\Commerce\Domain\Entity\Cart;
-use App\Module\Commerce\Domain\Entity\CartItem;
 use App\Module\Commerce\Infrastructure\Doctrine\Repository\CartRepository;
 use App\Module\Commerce\Domain\Repository\CartRepositoryInterface; 
 use App\Module\Commerce\Infrastructure\Doctrine\Repository\ProductRepository;
@@ -30,31 +29,42 @@ class AddItemToCartCommandHandler implements CommandHandlerInterface
 
     public function __invoke(AddItemToCartCommand $command): CommandResult
     {
+        // var_dump($command->dto);
+        // die();
+
+
         try {
             
-            $cart = $this->cartRepository->findById($command->dto->cartUuid) ?? new Cart();
+            $cart = $this->cartRepository->find($command->dto->cartUuid);
+
+        //        dump($cart);
+        // die();
+
 
             if (!$cart) {
-                throw new \InvalidArgumentException('Koszyk nie znaleziony.');
+                return new CommandResult(success: false, statusCode: Response::HTTP_NOT_FOUND, message: "Koszyk nie znaleziony.");
             }
     
             $product = $this->productRepository->find($command->dto->productId);
     
             if (!$product) {
-                throw new \InvalidArgumentException('Produkt nie znaleziony.');
+                return new CommandResult(success: false, statusCode: Response::HTTP_NOT_FOUND, message: "Produkt nie znaleziony.");
+            }
+
+            if ($command->dto->quantity <= 0) {
+                return new CommandResult(success: false, statusCode: Response::HTTP_BAD_REQUEST, message: "Nieprawidłowa ilość produktu.");
             }
     
             $cart->addItem($product, $command->dto->quantity);
+
+      
         
             $this->cartRepository->save($cart, true);
            
-
         } catch (Throwable $throwable) {
             $this->logger->error($throwable->getMessage());
             return new CommandResult(success: false, statusCode: Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         return new CommandResult(success: true, statusCode: Response::HTTP_CREATED);
-        
     }
 }
-

@@ -10,7 +10,7 @@
             <generator strategy="NONE"/>
         </id>
         
-        <!-- Relacja Many-to-One -->
+        <!-- Many-to-One relationship -->
         <many-to-one field="client" target-entity="App\Module\Commerce\Domain\Entity\Client" >
              <cascade>
                 <cascade-persist />
@@ -20,7 +20,8 @@
         </many-to-one>
         
 
-        <!-- Relacja One-to-Many (OrderProducts) -->
+      
+        <!-- One-to-Many relationship (Order Products) -->
         <one-to-many field="ordersProducts" target-entity="App\Module\Commerce\Domain\Entity\OrderProduct" mapped-by="order">
             <cascade>
                 <cascade-persist />
@@ -29,14 +30,15 @@
         </one-to-many>
 
         
-        <!-- Relacja One-to-Many (OrderStatusUpdates) -->
+        <!-- One-to-Many relationship (OrderStatusUpdates) -->
         <one-to-many field="ordersStatusUpdates" target-entity="App\Module\Commerce\Domain\Entity\OrderStatusUpdate" mapped-by="order">
             <cascade>
                 <cascade-persist />
                 <!-- <cascade-remove /> -->
             </cascade>
         </one-to-many>
-        <!-- Data utworzenia i zakończenia -->
+      
+        <!-- Created and completed date -->
         <field name="completedAt" type="datetime_immutable" nullable="true"/>
         <field name="createdAt" type="datetime_immutable"/>
       

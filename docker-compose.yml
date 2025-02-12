@@ -7,6 +7,8 @@ services:
             - ./:/var/www/html
             - ./vendor:/var/www/html/vendor
             - /var/lib/php/sessions:/var/lib/php/sessions
+        environment:
+          PHP_IDE_CONFIG: "serverName=php-local"
         depends_on:
             - mysql
             - redis

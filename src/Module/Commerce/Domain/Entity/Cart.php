@@ -15,16 +15,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class Cart
 {
     private readonly string $id;
-
+    private readonly Client $client;
     private Collection $items;
-
     private DateTimeImmutable $createdAt;
-
     private DateTimeImmutable $updatedAt;
 
-    public function __construct()
+    public function __construct(Client $client)
     {
+
         $this->id = (string) Uuid::v4();
+        $this->client = $client;
         $this->items = new ArrayCollection();
         $this->createdAt = new DateTimeImmutable();
         $this->updatedAt = new DateTimeImmutable();
@@ -36,6 +36,12 @@ class Cart
         return $this->id;
     }
 
+    public function getClient(): Client
+    {
+        return $this->client;
+    }
+
+
     public function getItems(): Collection
     {
         return $this->items;
@@ -43,7 +49,14 @@ class Cart
 
     public function addItem(Product $product, int $quantity): self 
     {
-        $this->items->add(new CartItem(cart: $this, product: $product, quantity: $quantity));
+        foreach ($this->items as $item) {
+            if ($item->getProduct() === $product) {
+                $item->increaseQuantity($quantity);
+                return $this;
+            }
+        }
+        
+        $this->items->add(new CartItem( $this,  $product,  $quantity));
         $this->updateItemPrice($product);  
         $this->refreshUpdatedAt();
         return $this;
