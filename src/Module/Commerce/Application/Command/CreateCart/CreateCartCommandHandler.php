@@ -27,9 +27,13 @@ class CreateCartCommandHandler implements CommandHandlerInterface
     public function __invoke(CreateCartCommand $command): CommandResult
     {
         try {
+
             $clientReference = $this->entityManager->getReference(Client::class, $command->dto->clientUuid);
+
             $cart = new Cart($clientReference);
+
             $this->cartRepository->save($cart, true);
+            
         } catch (Throwable $throwable) {
             $this->logger->error($throwable->getMessage());
             return new CommandResult(success: false, statusCode: Response::HTTP_INTERNAL_SERVER_ERROR);

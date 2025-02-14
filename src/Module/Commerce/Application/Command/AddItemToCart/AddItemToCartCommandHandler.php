@@ -29,17 +29,9 @@ class AddItemToCartCommandHandler implements CommandHandlerInterface
 
     public function __invoke(AddItemToCartCommand $command): CommandResult
     {
-        // var_dump($command->dto);
-        // die();
-
-
         try {
             
             $cart = $this->cartRepository->find($command->dto->cartUuid);
-
-        //        dump($cart);
-        // die();
-
 
             if (!$cart) {
                 return new CommandResult(success: false, statusCode: Response::HTTP_NOT_FOUND, message: "Koszyk nie znaleziony.");
@@ -57,8 +49,6 @@ class AddItemToCartCommandHandler implements CommandHandlerInterface
     
             $cart->addItem($product, $command->dto->quantity);
 
-      
-        
             $this->cartRepository->save($cart, true);
            
         } catch (Throwable $throwable) {

@@ -7,18 +7,20 @@ namespace App\Module\Commerce\UI\Controller;
 use App\Module\Commerce\Application\Command\CreateCart\CreateCartCommand;
 use App\Module\Commerce\Application\Command\AddItemToCart\AddItemToCartCommand;
 use App\Module\Commerce\Application\Command\UpdateCart\UpdateCartCommand;
-use App\Module\Commerce\Application\Command\RemoveItemFromCart\RemoveItemFromCartCommand;
+use App\Module\Commerce\Application\Command\RemoveCart\RemoveCartCommand;
 use App\Module\Commerce\Application\Query\GetCartItems\GetCartItemsQuery;
 use App\Module\Commerce\Application\DTO\CreateCartDTO;
 use App\Module\Commerce\Application\DTO\AddItemToCartDTO;
 use App\Module\Commerce\Application\DTO\UpdateItemCartDTO;
 use App\Module\Commerce\Application\DTO\RemoveItemFromCartDTO;
+use App\Module\Commerce\Application\Query\FindProductById\FindProductByIdQuery;
 use App\Module\Commerce\Application\Query\FindCartById\FindCartByIdQuery;
 use App\Common\Application\Bus\CommandBus\CommandBusInterface;
 use App\Common\Application\Bus\QueryBus\QueryBusInterface;
 use App\Common\Application\Response\ResponseBuilderInterface;
 use App\Common\Application\DTO\PaginationUuidDTO;
 use App\Module\Commerce\Domain\Entity\Cart;
+use App\Module\Commerce\Domain\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
@@ -141,12 +143,13 @@ class CartController extends AbstractController
         ),
     )]
     #[OA\RequestBody(content: new Model(type: UpdateItemCartDTO::class, groups: ['default']))]
-    #[Route('/update/{id}', methods: [Request::METHOD_PUT])]
+    #[Route('/update/{cartUuid}/{productId}', methods: [Request::METHOD_PUT])]
     #[IsGranted('ROLE_USER')]
     public function update(
         #[ValueResolver('update_item_cart_dto')] UpdateItemCartDTO $dto,
-        string $id,
-        ): Response
+        string $cartUuid, 
+        int $productId
+    ): Response
     {
         if ($dto->hasErrors()) {
             return $this->json([
@@ -155,19 +158,26 @@ class CartController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $queryResult = $this->queryBus->handle(new FindCartByIdQuery($id));
-       
-       
-        if ($queryResult->data !== null) {
+        $queryResult = $this->queryBus->handle(new FindCartByIdQuery($cartUuid));
+        $queryProductResult = $this->queryBus->handle(new FindProductByIdQuery($productId));
+
+        if ($queryResult->data !== null && $queryProductResult->data !== null) {
             $cart = $this->entityManager->getReference(Cart::class, $queryResult->data['id']);
-            $commandResult = $this->commandBus->handle(new UpdateCartCommand($cart, $dto));
+            $product = $this->entityManager->getReference(Product::class, $queryProductResult->data['id']);
+
+            $commandResult = $this->commandBus->handle(new UpdateCartCommand($cart->getId(), $product->getId(), $dto));
+
+            return $this->responseBuilder->buildResponse(
+                $commandResult, 
+                'Cart updated successfully.', 
+                'Failed to update cart'
+            );
         }
-        $var = 12;
-        return $this->responseBuilder->buildResponse(
-            $commandResult, 
-            'Cart updated successfully.', 
-            'Failed to update cart'
-        );
+
+        return $this->json([
+            'success' => false,
+            'errors' => ['Cart or product not found']
+        ], Response::HTTP_NOT_FOUND);
     }
 
     #[OA\Response(
@@ -180,19 +190,16 @@ class CartController extends AbstractController
             ],
         ),
     )]
-    #[OA\RequestBody(content: new Model(type: RemoveItemFromCartDTO::class, groups: ['default']))]
-    #[Route('/remove-item', methods: [Request::METHOD_POST])]
+    #[Route('/remove-cart/{id}', methods: [Request::METHOD_POST])]
     #[IsGranted('ROLE_USER')]
-    public function removeItemFromCart(#[ValueResolver('remove_item_from_cart_dto')] RemoveItemFromCartDTO $dto): Response
+    public function removeCart(string $id): Response
     {
-        if ($dto->hasErrors()) {
-            return $this->json([
-                'success' => false,
-                'errors' => $dto->getErrors(),
-            ], Response::HTTP_BAD_REQUEST);
-        }
+        $queryResult = $this->queryBus->handle(new FindCartByIdQuery($id));
 
-        $commandResult = $this->commandBus->handle(new RemoveItemFromCartCommand($dto));
+        if ($queryResult->data !== null) {
+            $cart = $this->entityManager->getReference(Cart::class, $queryResult->data['id']);
+            $commandResult = $this->commandBus->handle(new RemoveCartCommand($cart));
+        }
 
         return $this->responseBuilder->buildResponse(
             $commandResult, 

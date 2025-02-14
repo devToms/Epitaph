@@ -11,7 +11,8 @@ use App\Common\Application\Command\CommandInterface;
 class UpdateCartCommand implements CommandInterface
 {
     public function __construct(
-        public Cart $cart,
+        public string $cartUuid,
+        public int $productId,
         public UpdateItemCartDTO $dto
     ) {}
 }

@@ -2,6 +2,7 @@
 
 namespace App\Module\Commerce\Domain\Entity;
 
+use DateTimeImmutable;
 use App\Module\Commerce\Domain\Entity\Cart;
 use App\Module\Commerce\Domain\Entity\Product;
 use App\Repository\CartItemRepository;
@@ -12,14 +13,11 @@ use Symfony\Component\Uid\Uuid;
 class CartItem
 {
     private readonly string $id;
-
     private ?Cart $cart = null;
-
     private ?Product $product = null;
-
     private ?int $quantity = null;
-
     private ?float $price = null;
+    private ?DateTimeImmutable $deletedAt;
 
     public function __construct(Cart $cart, Product $product, int $quantity)
     {
@@ -27,6 +25,7 @@ class CartItem
         $this->cart = $cart;
         $this->product = $product;
         $this->quantity = $quantity;
+        $this->deletedAt = null;
     }
 
     public function getId(): string
@@ -94,10 +93,19 @@ class CartItem
         return $this;
     }
 
-
     public function getSubtotal(): float
     {
         return $this->getQuantity() * $this->product->getPrice();
+    }
+
+    public function softDelete(): void
+    {
+        $this->deletedAt = new DateTimeImmutable();
+    }
+
+    public function getDeletedAt(): ?DateTimeImmutable
+    {
+        return $this->deletedAt;
     }
 }
 

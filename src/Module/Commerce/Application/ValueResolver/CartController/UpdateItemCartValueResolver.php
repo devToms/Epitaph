@@ -27,9 +27,7 @@ readonly class UpdateItemCartValueResolver implements ValueResolverInterface
         $data = $request->toArray();
 
         $dto = new UpdateItemCartDTO(
-            productId: (int) ($data['productId'] ?? ''),
-            quantity: (int) ($data['quantity'] ?? 1),
-            userId: $data['userId'] ?? null,
+            quantity: (int) ($data['quantity'] ?? 1)
         );
 
         $errors = $this->validator->validate($dto);

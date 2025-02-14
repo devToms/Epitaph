@@ -142,8 +142,9 @@ class ProductsController extends AbstractController
         $queryResult = $this->queryBus->handle(new FindProductByIdQuery($id));
       
         if ($queryResult->data !== null) {
-            $product = $this->entityManager->getReference(Product::class, $queryResult->data['id']);
-            $commandResult = $this->commandBus->handle(new UpdateProductCommand($product, $dto));
+            $product = $this->entityManager->find(Product::class, $id);
+            // $product = $this->entityManager->getReference(Product::class, $queryResult->data['id']);
+            $commandResult = $this->commandBus->handle(new UpdateProductCommand($product->getId(), $dto));
         }
         return $this->responseBuilder->buildResponse(
             $commandResult, 

@@ -17,6 +17,7 @@ class Cart
     private readonly string $id;
     private readonly Client $client;
     private Collection $items;
+    private ?DateTimeImmutable $deletedAt;
     private DateTimeImmutable $createdAt;
     private DateTimeImmutable $updatedAt;
 
@@ -28,6 +29,7 @@ class Cart
         $this->items = new ArrayCollection();
         $this->createdAt = new DateTimeImmutable();
         $this->updatedAt = new DateTimeImmutable();
+        $this->deletedAt = null;
         $this->totalPrice = 0.0;
     }
 
@@ -77,27 +79,64 @@ class Cart
         throw new \InvalidArgumentException('Item not found in cart.');
     }
 
-    public function removeItem(Product $product): self
+       
+    public function updateItemQuantity(Product $product, int $quantity): self
     {
         foreach ($this->items as $item) {
-            if ($item->getProduct()->getId() === $product->getId()) {
-                $this->items->removeElement($item);
-                $this->refreshUpdatedAt(); 
-                break;
+            if ($item->getProduct() === $product) {
+                $item->setQuantity($quantity); 
+                $this->refreshUpdatedAt();
+                return $this;
             }
         }
 
-        return $this;
+        throw new \InvalidArgumentException('Item not found in cart.');
     }
 
-    public function updateItemPrice(Product $product): void
+    public function updateItemPrice(Product $product): self
     {
-        foreach ($this->getItems() as $item) {
-            if ($item->getProduct()->getId() === $product->getId()) {
+        foreach ($this->items as $item) {
+            if ($item->getProduct() === $product) {
                 $item->setPrice($item->getSubtotal());
+                $this->refreshUpdatedAt();
+                return $this;
+            }
+        }
+
+        throw new \InvalidArgumentException('Item not found in cart.');
+    }
+
+    public function removeItem(Product $product): void
+    {
+        foreach ($this->cartItems as $key => $cartItem) {
+            if ($cartItem->getProduct()->getId() === $product->getId()) {
+                $cartItem->softDelete();
+                break; 
             }
         }
     }
+
+    // public function removeItem(Product $product): self
+    // {
+    //     foreach ($this->items as $item) {
+    //         if ($item->getProduct()->getId() === $product->getId()) {
+    //             $this->items->removeElement($item);
+    //             $this->refreshUpdatedAt(); 
+    //             break;
+    //         }
+    //     }
+
+    //     return $this;
+    // }
+
+    // public function updateItemPrice(Product $product): void
+    // {
+    //     foreach ($this->getItems() as $item) {
+    //         if ($item->getProduct()->getId() === $product->getId()) {
+    //             $item->setPrice($item->getSubtotal());
+    //         }
+    //     }
+    // }
 
     public function clear(): self
     {
@@ -130,5 +169,10 @@ class Cart
     public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updatedAt;
+    }
+
+    public function getDeletedAt(): ?DateTimeImmutable
+    {
+        return $this->deletedAt;
     }
 }

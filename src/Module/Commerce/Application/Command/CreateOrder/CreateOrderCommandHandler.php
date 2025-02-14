@@ -40,13 +40,13 @@ readonly class CreateOrderCommandHandler implements CommandHandlerInterface
 
         if (!$token || !$token->getUser() instanceof User) {
 
-            throw new \LogicException('Nie znaleziono zalogowanego użytkownika.');
+            throw new \LogicException('No logged in user found.');
         }
 
         $user = $token->getUser();
         $client = new Client($user->getEmail(), $user->getName(), $user->getSurname());
         
-        $this->logger->debug('Dane wejściowe zamówienia', [
+        $this->logger->debug('Order input', [
             'cartId' => $command->dto->cartUuid,
             'user' => $user->getEmail(),
         ]);
@@ -55,7 +55,7 @@ readonly class CreateOrderCommandHandler implements CommandHandlerInterface
             $cart = $this->cartRepository->findByIdWithFind($command->dto->cartUuid);
             
             if (!$cart) {
-                throw new \InvalidArgumentException('Koszyk o podanym ID nie istnieje.');
+                throw new \InvalidArgumentException('The basket with the given ID does not exist.');
             }
 
             $order = new Order($client);
@@ -71,7 +71,7 @@ readonly class CreateOrderCommandHandler implements CommandHandlerInterface
             $this->orderRepository->save($order, true);
 
         } catch (Throwable $throwable) {
-            $this->logger->error('Błąd w CreateOrderCommandHandler', [
+            $this->logger->error('Error in Create Order Command Handler', [
                 'message' => $throwable->getMessage(),
                 'exception' => get_class($throwable),
                 'trace' => $throwable->getTraceAsString(),

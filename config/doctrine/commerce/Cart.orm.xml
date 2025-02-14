@@ -23,6 +23,7 @@
         </one-to-many>
 
 
+        <field name="deletedAt" type="datetime_immutable" nullable="true"/>
         <field name="createdAt" type="datetime_immutable" nullable="false"/>
         <field name="updatedAt" type="datetime_immutable" nullable="false"/>
 

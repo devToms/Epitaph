@@ -11,7 +11,7 @@ use App\Common\Application\Command\CommandInterface;
 readonly class UpdateProductCommand implements CommandInterface
 {
     public function __construct(
-        public Product $product,
+        public int $productId,
         public UpdateProductDTO $dto,
     ) {
     }

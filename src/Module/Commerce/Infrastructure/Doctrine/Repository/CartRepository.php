@@ -2,6 +2,7 @@
 
 namespace App\Module\Commerce\Infrastructure\Doctrine\Repository;
 
+use DateTimeImmutable;
 use App\Module\Commerce\Domain\Entity\Cart;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -38,6 +39,18 @@ class CartRepository extends ServiceEntityRepository implements CartRepositoryIn
     public function findByIdWithFind(string $id): ?Cart
     {
         return $this->registry->getRepository(Cart::class)->find($id); 
+    }
+
+    public function softDelete(Cart $cart): bool
+    {
+        return (bool) $this->createQueryBuilder('c')
+            ->update()
+            ->set('p.deletedAt', ':deletedAt')
+            ->where('c.id = :id')
+            ->setParameter('deletedAt', new DateTimeImmutable())
+            ->setParameter('id', $cart->getId())
+            ->getQuery()
+            ->execute();
     }
 }
 
