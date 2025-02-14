@@ -34,9 +34,9 @@ readonly class DeleteProductCommandHandler implements CommandHandlerInterface
         if (!$product) {
             return new CommandResult(success: false, statusCode: Response::HTTP_NOT_FOUND);
         }
-        
+
         try {
-            if (!$this->productRepository->softDelete($command->productId)) {
+            if (!$this->productRepository->softDelete($product)) {
                 return new CommandResult(success: false, statusCode: Response::HTTP_NOT_FOUND);
             }
         } catch (Throwable $throwable) {
