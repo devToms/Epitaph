@@ -34,8 +34,14 @@ readonly class RemoveCartCommandHandler implements CommandHandlerInterface
 
     public function __invoke(RemoveCartCommand $command): CommandResult
     {
+        $cart = $this->cartRepository->find($command->cartUuid);
+
+        if (!$cart) {
+            return new CommandResult(success: false, statusCode: Response::HTTP_NOT_FOUND);
+        }
+        
         try {
-            if (!$this->cartRepository->softDelete($command->cartUuid)) {
+            if (!$this->cartRepository->softDelete($cart)) {
                 return new CommandResult(success: false, statusCode: Response::HTTP_NOT_FOUND);
             }
         } catch (Throwable $throwable) {

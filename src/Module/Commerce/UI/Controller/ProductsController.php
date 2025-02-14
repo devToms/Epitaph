@@ -190,11 +190,11 @@ class ProductsController extends AbstractController
             ],
         ),
     )]
-    #[Route('/delete/{id}', methods: [Request::METHOD_DELETE])]
+    #[Route('/delete/{productId}', methods: [Request::METHOD_DELETE])]
     #[IsGranted(ProductsVoter::DELETE)]
-    public function delete(int $id): Response
+    public function delete(int $productId): Response
     {
-        $queryResult = $this->queryBus->handle(new FindProductByIdQuery($id));
+        $queryResult = $this->queryBus->handle(new FindProductByIdQuery($productId));
         if ($queryResult->data !== null) {
             $product = $this->entityManager->getReference(Product::class, $queryResult->data['id']);
             $commandResult = $this->commandBus->handle(new DeleteProductCommand($product->getId()));

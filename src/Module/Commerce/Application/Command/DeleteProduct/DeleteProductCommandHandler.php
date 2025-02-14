@@ -28,7 +28,13 @@ readonly class DeleteProductCommandHandler implements CommandHandlerInterface
     }
 
     public function __invoke(DeleteProductCommand $command): CommandResult
-    {
+    {   
+        $product = $this->productRepository->find($command->productId);
+
+        if (!$product) {
+            return new CommandResult(success: false, statusCode: Response::HTTP_NOT_FOUND);
+        }
+        
         try {
             if (!$this->productRepository->softDelete($command->productId)) {
                 return new CommandResult(success: false, statusCode: Response::HTTP_NOT_FOUND);
