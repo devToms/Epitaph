@@ -41,14 +41,14 @@ class CartRepository extends ServiceEntityRepository implements CartRepositoryIn
         return $this->registry->getRepository(Cart::class)->find($id); 
     }
 
-    public function softDelete(Cart $cart): bool
+    public function softDelete(string $UuidCart): bool
     {
         return (bool) $this->createQueryBuilder('c')
             ->update()
             ->set('p.deletedAt', ':deletedAt')
             ->where('c.id = :id')
             ->setParameter('deletedAt', new DateTimeImmutable())
-            ->setParameter('id', $cart->getId())
+            ->setParameter('id', $UuidCart)
             ->getQuery()
             ->execute();
     }

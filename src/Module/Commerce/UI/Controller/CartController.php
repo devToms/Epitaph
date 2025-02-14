@@ -190,15 +190,15 @@ class CartController extends AbstractController
             ],
         ),
     )]
-    #[Route('/remove-cart/{id}', methods: [Request::METHOD_POST])]
+    #[Route('/remove-cart/{cartUuid}', methods: [Request::METHOD_POST])]
     #[IsGranted('ROLE_USER')]
-    public function removeCart(string $id): Response
+    public function removeCart(string $cartUuid): Response
     {
-        $queryResult = $this->queryBus->handle(new FindCartByIdQuery($id));
-
+        $queryResult = $this->queryBus->handle(new FindCartByIdQuery($cartUuid));
+       
         if ($queryResult->data !== null) {
             $cart = $this->entityManager->getReference(Cart::class, $queryResult->data['id']);
-            $commandResult = $this->commandBus->handle(new RemoveCartCommand($cart));
+            $commandResult = $this->commandBus->handle(new RemoveCartCommand($cart->getId()));
         }
 
         return $this->responseBuilder->buildResponse(

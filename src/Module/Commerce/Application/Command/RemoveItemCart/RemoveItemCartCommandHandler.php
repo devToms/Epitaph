@@ -30,7 +30,7 @@ readonly class RemoveItemCartCommandHandler implements CommandHandlerInterface
     public function __invoke(RemoveItemCartCommand $command): CommandResult
     {
         try {
-            $cart = $this->cartRepository->find($command->dto->cartUuid);
+            $cart = $this->cartRepository->find($command->cartUuid);
 
        
         } catch (Throwable $throwable) {

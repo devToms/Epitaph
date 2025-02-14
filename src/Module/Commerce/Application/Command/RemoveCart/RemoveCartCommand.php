@@ -10,6 +10,6 @@ use App\Common\Application\Command\CommandInterface;
 class RemoveCartCommand implements CommandInterface
 {
     public function __construct(
-        public $cartId
+        public $cartUuid
     ) {}
 }
