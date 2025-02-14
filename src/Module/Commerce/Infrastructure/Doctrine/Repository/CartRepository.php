@@ -45,7 +45,7 @@ class CartRepository extends ServiceEntityRepository implements CartRepositoryIn
     {
         return (bool) $this->createQueryBuilder('c')
             ->update()
-            ->set('p.deletedAt', ':deletedAt')
+            ->set('c.deletedAt', ':deletedAt')
             ->where('c.id = :id')
             ->setParameter('deletedAt', new DateTimeImmutable())
             ->setParameter('id', $cart->getId())
