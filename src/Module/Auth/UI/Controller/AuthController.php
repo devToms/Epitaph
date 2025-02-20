@@ -8,25 +8,20 @@ use App\Module\Auth\Application\Command\LoginUser\LoginUserCommand;
 use App\Module\Auth\Application\Command\LogoutUser\LogoutUserCommand;
 use App\Module\Auth\Application\DTO\LoginUserDTO;
 use App\Module\Auth\Application\DTO\LogoutUserDTO;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use App\Common\Application\Bus\CommandBus\CommandBusInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
-use Symfony\Component\HttpFoundation\Cookie;
-
+use App\Common\Application\Response\ResponseBuilderInterface;
 
 #[Route('/api/v1')]
 class AuthController
 {
     public function __construct(
-        protected readonly CommandBusInterface $commandBus
+        protected readonly CommandBusInterface $commandBus,
+        protected readonly ResponseBuilderInterface $responseBuilder // Dodajemy ResponseBuilder
     ) {}
 
     #[OA\Response(
@@ -49,9 +44,11 @@ class AuthController
     public function login(#[ValueResolver('login_user_dto')] LoginUserDTO $dto): Response
     {
         if ($dto->hasErrors()) {
-            return new Response(
-                json_encode(['success' => false, 'errors' => $dto->getErrors()]),
-                Response::HTTP_BAD_REQUEST
+            return $this->responseBuilder->buildResponse(
+                new CommandResult(false, Response::HTTP_BAD_REQUEST),
+                null,
+                'Validation errors occurred.',
+                ['errors' => $dto->getErrors()]
             );
         }
 
@@ -60,11 +57,17 @@ class AuthController
                 new LoginUserCommand($dto)
             );
 
-            return new Response(json_encode(['success' => true, 'data' => $result]), Response::HTTP_OK);
+            return $this->responseBuilder->buildResponse(
+                new CommandResult(true, Response::HTTP_OK),
+                'User logged in successfully.',
+                null,
+                ['token' => $result] 
+            );
         } catch (AuthenticationException $e) {
-            return new Response(
-                json_encode(['success' => false, 'message' => $e->getMessage()]),
-                Response::HTTP_UNAUTHORIZED
+            return $this->responseBuilder->buildResponse(
+                new CommandResult(false, Response::HTTP_UNAUTHORIZED),
+                null,
+                $e->getMessage()
             );
         }
     }
@@ -84,18 +87,20 @@ class AuthController
     public function logout(#[ValueResolver('logout_user_dto')] LogoutUserDTO $dto): Response
     {
         try {
-            $result = $this->commandBus->handle(
+            $this->commandBus->handle(
                 new LogoutUserCommand($dto)
             );
 
-            return new Response(json_encode(['success' => true, 'data' => $result]), Response::HTTP_OK);
+            return $this->responseBuilder->buildResponse(
+                new CommandResult(true, Response::HTTP_OK),
+                'User logged out successfully.'
+            );
         } catch (AuthenticationException $e) {
-            return new Response(
-                json_encode(['success' => false, 'message' => $e->getMessage()]),
-                Response::HTTP_UNAUTHORIZED
+            return $this->responseBuilder->buildResponse(
+                new CommandResult(false, Response::HTTP_UNAUTHORIZED),
+                null,
+                $e->getMessage()
             );
         }
     }
-    
-     
 }

@@ -54,10 +54,12 @@ class UserController extends AbstractController
     public function register(#[ValueResolver('create_user_dto')] CreateUserDTO $dto): Response
     {
         if ($dto->hasErrors()) {
-            return $this->json([
-                'success' => false,
-                'errors' => $dto->getErrors(),
-            ], Response::HTTP_BAD_REQUEST);
+            return $this->responseBuilder->buildResponse(
+                new CommandResult(false, Response::HTTP_BAD_REQUEST),
+                null,
+                'Validation errors occurred.',
+                ['errors' => $dto->getErrors()] 
+            );
         }
 
         $commandResult = $this->commandBus->handle(new CreateUserCommandEvent($dto));
@@ -67,19 +69,11 @@ class UserController extends AbstractController
             $user = $this->entityManager->getReference(User::class, $queryResult->data['id']);
         }
 
-        $result = match (true) {
-            $commandResult->success && $queryResult->success && isset($user) => [
-                'success' => true,
-                'message' => 'Successfully registered.',
-                'data' => [
-                    'token' => $this->JWTTokenManager->create($user),
-                ],
-            ],
-            default => [
-                'success' => false,
-                'message' => 'Something went wrong while registering.',
-            ]
-        };
-        return $this->json($result, $commandResult->statusCode);
+        return $this->responseBuilder->buildResponse(
+            $commandResult,
+            'Successfully registered.',
+            'Something went wrong while registering.',
+            $token !== null ? ['token' => $token] : null
+        );
     }
 }
