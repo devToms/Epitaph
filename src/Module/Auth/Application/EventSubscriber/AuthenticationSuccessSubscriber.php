@@ -9,6 +9,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Events;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Psr\Log\LoggerInterface;
 
 class AuthenticationSuccessSubscriber implements EventSubscriberInterface
 {
@@ -29,6 +30,8 @@ class AuthenticationSuccessSubscriber implements EventSubscriberInterface
                 ],
             ],
         );
+
+        $this->logger->info('User successfully authenticated', ['token' => $event->getData()['token']]);
     }
 
     public static function getSubscribedEvents(): array

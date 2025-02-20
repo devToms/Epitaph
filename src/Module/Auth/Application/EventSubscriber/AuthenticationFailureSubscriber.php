@@ -7,6 +7,8 @@ namespace App\Module\Auth\Application\EventSubscriber;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationFailureEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Psr\Log\LoggerInterface;
+
 
 class AuthenticationFailureSubscriber implements EventSubscriberInterface
 {
@@ -19,6 +21,8 @@ class AuthenticationFailureSubscriber implements EventSubscriberInterface
 
         $response->setContent(json_encode($content));
         $event->setResponse($response);
+
+        $this->logger->error('Authentication failed', ['response' => $content]);
     }
 
     public static function getSubscribedEvents(): array
